@@ -1,0 +1,87 @@
+{
+    "config": {
+        "ONBOARD_SPIF": {
+            "help": "On-board SPI flash present or not",
+            "value": false
+        },
+        "ONBOARD_SPI_MOSI":{
+            "help": "SPI MOSI pin for on-board SPI flash",
+            "value": "NC"
+        },
+        "ONBOARD_SPI_MISO": {
+            "help": "SPI MISO pin for on-board SPI flash",
+            "value": "NC"
+        },
+        "ONBOARD_SPI_CLK": {
+            "help": "SPI CLK pin for on-board SPI flash",
+            "value": "NC"
+        },
+        "ONBOARD_SPI_CS": {
+            "help": "SPI CS pin for on-board SPI flash",
+            "value": "NC"
+        },
+        "SPI_MOSI":{
+            "help": "SPI MOSI pin for attached SPI flash",
+            "value": "NC"
+        },
+        "SPI_MISO": {
+            "help": "SPI MISO pin for attached SPI flash",
+            "value": "NC"
+        },
+        "SPI_CLK": {
+            "help": "SPI CLK pin for attached SPI flash",
+            "value": "NC"
+        },
+        "SPI_CS": {
+            "help": "SPI CS pin for attached SPI flash",
+            "value": "NC"
+        }
+    },
+    "target_overrides": {
+        "*": {
+            "platform.stdio-baud-rate": 9600,
+            "platform.stdio-convert-newlines": true
+        },
+        "NUMAKER_PFM_NUC472": {
+            "target.macros_add": [
+                "BUTTON1=SW1"
+            ],
+            "SPI_MOSI": "PF_0",
+            "SPI_MISO": "PD_15",
+            "SPI_CLK":  "PD_14",
+            "SPI_CS":   "PD_13"
+        },
+        "NUMAKER_PFM_M453": {
+            "target.macros_add": [
+                "BUTTON1=SW2"
+            ],
+            "SPI_MOSI": "PD_13",
+            "SPI_MISO": "PD_14",
+            "SPI_CLK":  "PD_15",
+            "SPI_CS":   "PD_12"
+        },
+        "NUMAKER_PFM_M487": {
+            "target.macros_add": [
+                "BUTTON1=SW2"
+            ],
+            "ONBOARD_SPIF": true,
+            "ONBOARD_SPI_MOSI": "PC_0",
+            "ONBOARD_SPI_MISO": "PC_1",
+            "ONBOARD_SPI_CLK":  "PC_2",
+            "ONBOARD_SPI_CS":   "PC_3",
+            "SPI_MOSI": "D11",
+            "SPI_MISO": "D12",
+            "SPI_CLK":  "D13",
+            "SPI_CS":   "D10"
+        },
+        "NUMAKER_PFM_NANO130": {
+            "target.macros_add": [
+                "BUTTON1=SW1"
+            ],
+            "SPI_MOSI": "D11",
+            "SPI_MISO": "D12",
+            "SPI_CLK":  "D13",
+            "SPI_CS":   "D10"
+        }
+    }
+}

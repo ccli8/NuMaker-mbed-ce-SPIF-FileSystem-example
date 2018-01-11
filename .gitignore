@@ -1,4 +1,5 @@
-.build
 .mbed
-projectfiles
-*.py*
+.build/
+BUILD/
+mbed-os/
+spif-driver/
