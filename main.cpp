@@ -27,27 +27,18 @@
 #include "LittleFileSystem.h"
 #include "FATFileSystem.h"
 
-
-// Physical block device, can be any device that supports the BlockDevice API
-#if MBED_CONF_APP_ONBOARD_SPIF
-/* Some targets, e.g. NUMAKER_PFM_M487 support on-board SPI flash. */
-SPIFBlockDevice bd(MBED_CONF_APP_ONBOARD_SPI_MOSI,
-                MBED_CONF_APP_ONBOARD_SPI_MISO,
-                MBED_CONF_APP_ONBOARD_SPI_CLK,
-                MBED_CONF_APP_ONBOARD_SPI_CS);
-
 #if defined(TARGET_NUMAKER_PFM_M487)
 /* We needn't write-protect and hold functions. Configure /WP and /HOLD pins to high. */
 DigitalOut onboard_spi_wp(PC_5, 1);
 DigitalOut onboard_spi_hold(PC_4, 1);
 #endif
-#else
-/* Externally attached SPI flash */
-SPIFBlockDevice bd(MBED_CONF_APP_SPI_MOSI,
-                MBED_CONF_APP_SPI_MISO,
-                MBED_CONF_APP_SPI_CLK,
-                MBED_CONF_APP_SPI_CS);
-#endif
+
+SPIFBlockDevice bd(MBED_CONF_SPIF_DRIVER_SPI_MOSI,
+                   MBED_CONF_SPIF_DRIVER_SPI_MISO,
+                   MBED_CONF_SPIF_DRIVER_SPI_CLK,
+                   MBED_CONF_SPIF_DRIVER_SPI_CS);
+
+
 
 // File system declaration
 LittleFileSystem fs("fs");
