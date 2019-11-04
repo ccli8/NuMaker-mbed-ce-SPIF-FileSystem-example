@@ -33,6 +33,13 @@
             "spif-driver.SPI_MISO"              : "PC_1",
             "spif-driver.SPI_CLK"               : "PC_2",
             "spif-driver.SPI_CS"                : "PC_3"
+        },
+        "NUMAKER_IOT_M487": {
+            "target.components_add"             : ["SPIF"],
+            "spif-driver.SPI_MOSI"              : "PC_0",
+            "spif-driver.SPI_MISO"              : "PC_1",
+            "spif-driver.SPI_CLK"               : "PC_2",
+            "spif-driver.SPI_CS"                : "PC_3"
         }
     }
 }

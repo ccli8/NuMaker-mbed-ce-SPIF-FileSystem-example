@@ -27,7 +27,7 @@
 #include "LittleFileSystem.h"
 #include "FATFileSystem.h"
 
-#if defined(TARGET_NUMAKER_PFM_M487)
+#if defined(TARGET_NUMAKER_PFM_M487) || defined(TARGET_NUMAKER_IOT_M487)
 /* We needn't write-protect and hold functions. Configure /WP and /HOLD pins to high. */
 DigitalOut onboard_spi_wp(PC_5, 1);
 DigitalOut onboard_spi_hold(PC_4, 1);
