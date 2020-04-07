@@ -1,5 +1,5 @@
 /* mbed Microcontroller Library
- * Copyright (c) 2006-2013 ARM Limited
+ * Copyright (c) 2006-2019 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,10 @@
 #include <stdio.h>
 #include <errno.h>
 
-// Block devices
 #include "SPIFBlockDevice.h"
-//#include "DataFlashBlockDevice.h"
-//#include "SDBlockDevice.h"
-//#include "HeapBlockDevice.h"
 
-// File systems
-#include "LittleFileSystem.h"
-#include "FATFileSystem.h"
+// Maximum number of elements in buffer
+#define BUFFER_MAX_LEN 10
 
 #if defined(TARGET_NUMAKER_PFM_M487) || defined(TARGET_NUMAKER_IOT_M487)
 /* We needn't write-protect and hold functions. Configure /WP and /HOLD pins to high. */
@@ -33,15 +28,18 @@ DigitalOut onboard_spi_wp(PC_5, 1);
 DigitalOut onboard_spi_hold(PC_4, 1);
 #endif
 
-SPIFBlockDevice bd(MBED_CONF_SPIF_DRIVER_SPI_MOSI,
-                   MBED_CONF_SPIF_DRIVER_SPI_MISO,
-                   MBED_CONF_SPIF_DRIVER_SPI_CLK,
-                   MBED_CONF_SPIF_DRIVER_SPI_CS);
+BlockDevice *bd = new SPIFBlockDevice(MBED_CONF_SPIF_DRIVER_SPI_MOSI,
+                                      MBED_CONF_SPIF_DRIVER_SPI_MISO,
+                                      MBED_CONF_SPIF_DRIVER_SPI_CLK,
+                                      MBED_CONF_SPIF_DRIVER_SPI_CS);
 
-
-
-// File system declaration
+// This example uses LittleFileSystem as the default file system
+#include "LittleFileSystem.h"
 LittleFileSystem fs("fs");
+
+// Uncomment the following two lines and comment the previous two to use FAT file system.
+// #include "FATFileSystem.h"
+// FATFileSystem fs("fs");
 
 
 // Set up the button to trigger an erase
@@ -49,7 +47,7 @@ InterruptIn irq(BUTTON1);
 void erase() {
     printf("Initializing the block device... ");
     fflush(stdout);
-    int err = bd.init();
+    int err = bd->init();
     printf("%s\n", (err ? "Fail :(" : "OK"));
     if (err) {
         error("error: %s (%d)\n", strerror(-err), err);
@@ -57,7 +55,7 @@ void erase() {
 
     printf("Erasing the block device... ");
     fflush(stdout);
-    err = bd.erase(0, bd.size());
+    err = bd->erase(0, bd->size());
     printf("%s\n", (err ? "Fail :(" : "OK"));
     if (err) {
         error("error: %s (%d)\n", strerror(-err), err);
@@ -65,7 +63,7 @@ void erase() {
 
     printf("Deinitializing the block device... ");
     fflush(stdout);
-    err = bd.deinit();
+    err = bd->deinit();
     printf("%s\n", (err ? "Fail :(" : "OK"));
     if (err) {
         error("error: %s (%d)\n", strerror(-err), err);
@@ -84,14 +82,14 @@ int main() {
     // Try to mount the filesystem
     printf("Mounting the filesystem... ");
     fflush(stdout);
-    int err = fs.mount(&bd);
+    int err = fs.mount(bd);
     printf("%s\n", (err ? "Fail :(" : "OK"));
     if (err) {
         // Reformat if we can't mount the filesystem
         // this should only happen on the first boot
         printf("No filesystem found, formatting... ");
         fflush(stdout);
-        err = fs.reformat(&bd);
+        err = fs.reformat(bd);
         printf("%s\n", (err ? "Fail :(" : "OK"));
         if (err) {
             error("error: %s (%d)\n", strerror(-err), err);
@@ -142,8 +140,19 @@ int main() {
         long pos = ftell(f);
 
         // Parse out the number and increment
-        int32_t number;
-        fscanf(f, "%d", &number);
+        char buf[BUFFER_MAX_LEN];
+        if (!fgets(buf, BUFFER_MAX_LEN, f)) {
+            error("error: %s (%d)\n", strerror(errno), -errno);
+        }
+        char *endptr;
+        int32_t number = strtol(buf, &endptr, 10);
+        if (
+            (errno == ERANGE) || // The number is too small/large
+            (endptr == buf) ||   // No character was read
+            (*endptr && *endptr != '\n') // The whole input was not converted
+        ) {
+            continue;
+        }
         number += 1;
 
         // Seek to beginning of number
@@ -151,6 +160,9 @@ int main() {
     
         // Store number
         fprintf(f, "    %d\n", number);
+
+        // Flush between write and read on same file
+        fflush(f);
     }
     printf("\rIncrementing numbers (%d/%d)... OK\n", 10, 10);
 
