@@ -41,7 +41,8 @@ LittleFileSystem fs("fs");
 // #include "FATFileSystem.h"
 // FATFileSystem fs("fs");
 
-
+// Support bare-metal build in which RTOS will be absent
+#if MBED_CONF_RTOS_PRESENT
 // Set up the button to trigger an erase
 InterruptIn irq(BUTTON1);
 void erase() {
@@ -69,15 +70,17 @@ void erase() {
         error("error: %s (%d)\n", strerror(-err), err);
     }
 }
-
+#endif
 
 // Entry point for the example
 int main() {
     printf("--- Mbed OS filesystem example ---\n");
 
+#if MBED_CONF_RTOS_PRESENT
     // Setup the erase event on button press, use the event queue
     // to avoid running in interrupt context
     irq.fall(mbed_event_queue()->event(erase));
+#endif
 
     // Try to mount the filesystem
     printf("Mounting the filesystem... ");
