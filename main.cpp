@@ -72,6 +72,12 @@ void erase() {
 }
 #endif
 
+#if MBED_CONF_RTOS_PRESENT
+#if MBED_MAJOR_VERSION >= 6
+static auto erase_event = mbed_event_queue()->make_user_allocated_event(erase);
+#endif
+#endif
+
 // Entry point for the example
 int main() {
     printf("--- Mbed OS filesystem example ---\n");
@@ -79,7 +85,11 @@ int main() {
 #if MBED_CONF_RTOS_PRESENT
     // Setup the erase event on button press, use the event queue
     // to avoid running in interrupt context
+#if MBED_MAJOR_VERSION >= 6
+    irq.fall(std::ref(erase_event));
+#else
     irq.fall(mbed_event_queue()->event(erase));
+#endif
 #endif
 
     // Try to mount the filesystem
