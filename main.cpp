@@ -22,8 +22,26 @@
 // Maximum number of elements in buffer
 #define BUFFER_MAX_LEN 10
 
-#if defined(TARGET_NUMAKER_PFM_M487) || defined(TARGET_NUMAKER_IOT_M487)
-/* We needn't write-protect and hold functions. Configure /WP and /HOLD pins to high. */
+/* Disable write-protect (/WP) and hold (/HOLD) functions
+ *
+ * Excerpt on QE bit of Winbond SPI Flash:
+ *
+ * The Quad Enable (QE) bit is a non-volatile read/write bit in the status
+ * register (S9) that enables Quad SPI operation. When the QE bit is set to
+ * a 0 state (factory default for part numbers with ordering options “IM”),
+ * the /HOLD are enabled, the device operates in Standard/Dual SPI modes.
+ * When the QE bit is set to a 1 (factory fixed default for part numbers with
+ * ordering options “IQ”), the Quad IO2 and IO3 pins are enabled, and /HOLD
+ * function is disabled, the device operates in Standard/Dual/Quad SPI modes.
+ *
+ * So that we need to disable write-protect and hold functions by driving /WP
+ * and /HOLD pins to high if QE bit is not set.
+ */
+#if defined(TARGET_NUMAKER_IOT_M467)
+/* Can comment out the below lines if QE bit is set, e.g. W25Q32JVSSIQ, or keep them for safe */
+DigitalOut onboard_spi_wp(PI_13, 1);
+DigitalOut onboard_spi_hold(PI_12, 1);
+#elif defined(TARGET_NUMAKER_PFM_M487) || defined(TARGET_NUMAKER_IOT_M487)
 DigitalOut onboard_spi_wp(PC_5, 1);
 DigitalOut onboard_spi_hold(PC_4, 1);
 #endif
